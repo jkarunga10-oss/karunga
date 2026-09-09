@@ -3,621 +3,887 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CALL CENTER SPIN WHEEL</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Show Me the Thief — Live Scoreboard</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
   :root{
-    --bg-deep:#0A0F1E;
-    --bg-mid:#121A30;
-    --surface:#182140;
-    --surface-2:#1E2A4D;
-    --border:#2C3860;
-    --text-primary:#F3F5FB;
-    --text-dim:#8C98BE;
-    --gold:#F2B84B;
-    --gold-soft:#F7D48A;
+    --ink: #17112B;
+    --ink-2: #221A3B;
+    --panel: #271E45;
+    --plum: #3C1F4D;
+    --plum-light: #5A3A6E;
+    --gold: #D8AA46;
+    --gold-soft: #E9CE8E;
+    --cream: #F3E9D2;
+    --crimson: #A5313F;
+    --crimson-dark: #7C2530;
+    --teal: #2E7D6B;
+    --teal-dark: #23604F;
+    --line: rgba(216,170,70,0.28);
+    --radius: 10px;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+
+  *{ box-sizing: border-box; }
+
   body{
+    margin:0;
     min-height:100vh;
     background:
-      radial-gradient(circle at 50% -10%, var(--bg-mid), var(--bg-deep) 65%);
-    font-family:'Inter', -apple-system, sans-serif;
-    color:var(--text-primary);
-    padding:2.5rem 1.25rem 3rem;
+      radial-gradient(1200px 700px at 15% -10%, #2A2049 0%, transparent 55%),
+      radial-gredient(900px 600px at 100% 0%, #241a3f 0%, transparent 50%),
+      linear-gradient(180deg, var(--ink) 0%, #140F26 100%);
+    color: var(--cream);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height:1.5;
   }
-  h1,h2{font-family:'Space Grotesk', 'Inter', sans-serif; margin:0;}
 
-  .stage{max-width:980px; margin:0 auto;}
-  .top{text-align:center; margin-bottom:2.25rem;}
-  .top h1{font-size:clamp(1.6rem, 3.4vw, 2.2rem); font-weight:600; letter-spacing:-0.01em;}
-  .top p{color:var(--text-dim); font-size:0.95rem; max-width:480px; margin:0.6rem auto 0; line-height:1.5;}
+  .display{ font-family:'Fraunces', Georgia, serif; }
 
-  .layout{
-    display:flex;
-    gap:2.5rem;
-    align-items:flex-start;
-    justify-content:center;
+  a{ color: var(--gold-soft); }
+
+  /* ---------- shell ---------- */
+  .shell{ max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  header.hero{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
     flex-wrap:wrap;
+    padding: 22px 26px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, rgba(216,170,70,0.10), rgba(60,31,77,0.35));
+    margin-bottom: 22px;
+  }
+  header.hero .titles h1{
+    margin:0; font-size: 2.1rem; font-weight:600; color: var(--gold-soft);
+    letter-spacing: 0.3px;
+  }
+  header.hero .titles p{
+    margin: 6px 0 0; color: rgba(243,233,210,0.65); font-size: 0.95rem;
+  }
+  header.hero .roundtag{
+    font-family:'Fraunces', serif; font-weight:600; font-size:0.95rem;
+    color: var(--ink); background: var(--gold-soft);
+    padding: 8px 16px; border-radius: 999px; white-space:nowrap;
   }
 
-  /* ---------- Wheel panel ---------- */
-  .wheel-panel{text-align:center; flex:0 0 auto;}
-  #ringWrap{position:relative; width:360px; height:360px; margin:0 auto; border-radius:50%;}
-  #pointer{
-    position:absolute; top:-6px; left:50%; transform:translateX(-50%); z-index:3;
-    width:0; height:0;
-    border-left:15px solid transparent; border-right:15px solid transparent;
-    border-top:26px solid var(--gold);
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  /* ---------- tabs ---------- */
+  nav.tabs{
+    display:flex; gap:6px; margin-bottom: 22px; border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
   }
-  #wheel{width:360px; height:360px; display:block; border-radius:50%; transition:filter 0.4s ease;}
-  #wheel.wheel-blurred{filter:blur(6px);}
-  #hub{fill:var(--surface-2); stroke:var(--border); stroke-width:1.5;}
+  nav.tabs button{
+    font-family:'Manrope', sans-serif; font-weight:700; font-size:0.92rem;
+    background:none; border:none; color: rgba(243,233,210,0.55);
+    padding: 12px 6px; margin-right: 22px; cursor:pointer;
+    border-bottom: 3px solid transparent; transition: color .15s ease, border-color .15s ease;
+  }
+  nav.tabs button:hover{ color: var(--cream); }
+  nav.tabs button.active{ color: var(--gold-soft); border-bottom-color: var(--gold); }
 
-  @keyframes glowPulse{
-    0%,100%{ box-shadow:0 0 0 6px var(--glow-color, var(--gold)); }
-    50%{ box-shadow:0 0 0 15px var(--glow-color, #378ADD); }
-  }
-  .spinning-ring{animation:glowPulse 0.32s ease-in-out infinite;}
+  .tabpanel{ display:none; }
+  .tabpanel.active{ display:block; animation: fadein .25s ease; }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
 
-  #countdownLayer{position:absolute; inset:0; pointer-events:none; z-index:2;}
-  .count-num{
-    position:absolute; top:50%; left:50%;
-    font-family:'Space Grotesk', sans-serif;
-    font-size:88px; font-weight:600; color:var(--text-primary);
-    text-shadow:0 0 24px rgba(242,184,75,0.5);
-    animation:numberPop 0.9s ease-out forwards;
+  /* ---------- generic panel/card ---------- */
+  .panel{
+    border:1px solid var(--line); border-radius: var(--radius);
+    background: rgba(255,255,255,0.02);
+    padding: 20px 22px; margin-bottom: 18px;
   }
-  @keyframes numberPop{
-    0%{ transform:translate(-50%,-50%) scale(0.2); opacity:0; }
-    40%{ transform:translate(-50%,-50%) scale(1.15); opacity:1; }
-    80%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
-    100%{ transform:translate(-50%,-50%) scale(1); opacity:0; }
+  .panel h2{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.25rem;
+    margin: 0 0 4px; color: var(--cream);
   }
+  .panel .sub{ color: rgba(243,233,210,0.55); font-size:0.87rem; margin: 0 0 16px; }
 
-  #revealWrap{position:absolute; inset:0; pointer-events:none; z-index:10;}
-  @keyframes popIn{
-    0%{ transform:translate(-50%,-50%) scale(0.3); opacity:0; }
-    60%{ transform:translate(-50%,-50%) scale(1.08); opacity:1; }
-    100%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+  /* ---------- team summary ---------- */
+  .team-row{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-bottom: 18px; }
+  .team-card{
+    border-radius: var(--radius); padding: 18px 18px 16px;
+    background: var(--panel); border-top: 3px solid var(--accent, var(--gold));
+    border: 1px solid var(--line); border-top-width:3px; border-top-color: var(--accent, var(--gold));
   }
-  .reveal-card{
-    animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
-    position:absolute; top:50%; left:50%;
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:18px; padding:1.5rem 1.75rem;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-    width:270px; box-sizing:border-box;
-    box-shadow:0 20px 50px rgba(0,0,0,0.5);
-  }
-  .avatar{
-    width:56px; height:56px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px; color:#0A0F1E;
-    box-shadow:0 0 0 4px rgba(242,184,75,0.35);
-  }
-  .reveal-eyebrow{font-size:12px; color:var(--gold-soft); margin:2px 0 0;}
-  .reveal-name{font-family:'Space Grotesk', sans-serif; font-size:21px; font-weight:600; text-align:center; line-height:1.25; margin:0;}
-  .reveal-sub{font-size:12.5px; color:var(--text-dim); margin:0;}
+  .team-card .tname{ font-family:'Fraunces', serif; font-weight:600; font-size:1.05rem; }
+  .team-card .tmeta{ color: rgba(243,233,210,0.5); font-size:0.8rem; margin-top:2px; }
+  .team-card .ttotal{ font-size:2.1rem; font-weight:800; margin-top:10px; color: var(--gold-soft); }
 
-  .confetti{position:absolute; top:50%; left:50%; width:8px; height:8px; border-radius:2px; animation:confettiPop 1.1s ease-out forwards;}
-  @keyframes confettiPop{
-    0%{ transform:translate(0,0) rotate(0deg) scale(0.4); opacity:1; }
-    100%{ transform:translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); opacity:0; }
+  /* ---------- leaderboard list ---------- */
+  .board-row{
+    display:flex; align-items:center; gap:14px;
+    padding: 12px 14px; border-radius: 8px;
+    border: 1px solid transparent; border-bottom: 1px solid rgba(216,170,70,0.12);
   }
+  .board-row.lead{ border-color: var(--gold); background: rgba(216,170,70,0.08); }
+  .board-row .rank{
+    width:28px; text-align:center; font-family:'Fraunces', serif; font-weight:700;
+    color: rgba(243,233,210,0.55); font-size:1.05rem;
+  }
+  .board-row.lead .rank{ color: var(--gold); }
+  .board-row .who{ flex:1; min-width:0; }
+  .board-row .who .name{ font-weight:700; font-size:1rem; }
+  .board-row .who .team{ font-size:0.78rem; color: rgba(243,233,210,0.5); display:flex; align-items:center; gap:6px; margin-top:2px; }
+  .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; background: var(--accent, var(--gold)); }
+  .board-row .pts{ font-size:1.35rem; font-weight:800; color: var(--gold-soft); min-width:70px; text-align:right; }
 
-  #spinBtn{
-    margin-top:2rem; font-family:'Space Grotesk', sans-serif;
-    font-size:17px; font-weight:600; padding:14px 38px;
-    display:inline-flex; align-items:center; gap:10px;
-    background:var(--gold); color:#1A1300; border:none; border-radius:999px;
-    cursor:pointer; transition:transform 0.15s ease, opacity 0.15s ease;
+  .champion-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    background: linear-gradient(135deg, rgba(216,170,70,0.16), rgba(216,170,70,0.04));
+    border:1px solid var(--gold); border-radius: var(--radius);
+    padding: 16px 20px; margin-bottom:18px;
   }
-  #spinBtn:hover:not(:disabled){transform:translateY(-1px);}
-  #spinBtn:disabled{opacity:0.4; cursor:not-allowed;}
-  #spinBtn:focus-visible{outline:2px solid var(--gold-soft); outline-offset:3px;}
+  .champion-banner .ctext{ font-family:'Fraunces', serif; font-size:1.15rem; color: var(--gold-soft); }
+  .champion-banner .ctext b{ color: var(--cream); }
 
-  #resetBtn{
-    margin-top:0.9rem; display:block; margin-left:auto; margin-right:auto;
-    background:none; border:1px solid var(--border); color:var(--text-dim);
-    font-family:'Inter', sans-serif; font-size:13px; padding:8px 18px;
-    border-radius:999px; cursor:pointer; transition:border-color 0.15s ease, color 0.15s ease;
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:'Manrope', sans-serif; font-weight:700; font-size:0.88rem;
+    border-radius: 8px; padding: 10px 18px; cursor:pointer; border:1px solid transparent;
+    transition: transform .08s ease, filter .15s ease;
   }
-  #resetBtn:hover{border-color:var(--text-dim); color:var(--text-primary);}
-  #resetBtn:focus-visible{outline:2px solid var(--gold-soft); outline-offset:3px;}
+  .btn:active{ transform: translateY(1px); }
+  .btn-gold{ background: var(--gold); color: var(--ink); }
+  .btn-gold:hover{ filter:brightness(1.08); }
+  .btn-ghost{ background: transparent; color: var(--cream); border-color: var(--line); }
+  .btn-ghost:hover{ border-color: var(--gold); color: var(--gold-soft); }
+  .btn-danger{ background: transparent; color: var(--crimson); border-color: rgba(165,49,63,0.5); }
+  .btn-danger:hover{ background: rgba(165,49,63,0.12); }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-sm{ padding:6px 12px; font-size:0.78rem; }
 
-  #roundBanner{
-    margin-top:1rem; font-size:13px; color:var(--gold-soft);
-    min-height:1.2em;
-  }
-
-  /* ---------- Roster panel ---------- */
-  .roster-panel{
-    flex:1 1 300px; max-width:340px;
-    background:var(--surface); border:1px solid var(--border); border-radius:16px;
-    padding:1.1rem 1.2rem 1.3rem;
-  }
-  .roster-panel h2{font-size:14px; font-weight:600; color:var(--text-dim); margin-bottom:0.85rem;}
-  .roster-list{
-    display:grid; grid-template-columns:1fr 1fr; gap:0.15rem 0.9rem;
-    max-height:420px; overflow-y:auto; padding-right:2px;
-  }
-  .roster-row{
+  /* ---------- round entry ---------- */
+  .roster-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .roster-col h3{
+    font-family:'Fraunces', serif; font-size:0.95rem; font-weight:600; margin:0 0 8px;
+    color: var(--accent);
     display:flex; align-items:center; gap:8px;
-    padding:6px 4px; border-radius:8px;
-    font-size:12.5px; transition:opacity 0.3s ease;
   }
-  .roster-row.exhausted{opacity:0.32;}
-  .roster-dot{width:9px; height:9px; border-radius:50%; flex:0 0 auto;}
-  .roster-name{flex:1 1 auto; line-height:1.25; overflow-wrap:anywhere;}
-  .pips{display:flex; gap:3px; flex:0 0 auto;}
-  .pip{width:6px; height:6px; border-radius:50%; background:var(--border);}
-  .pip.filled{background:var(--gold);}
+  .roster-col label{
+    display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:6px;
+    font-size:0.88rem; cursor:pointer; border-left: 2px solid transparent;
+  }
+  .roster-col label:hover{ background: rgba(255,255,255,0.03); }
+  .roster-col label.checked{ border-left-color: var(--accent); background: rgba(255,255,255,0.03); }
+  .roster-col input[type=checkbox]{ accent-color: var(--gold); width:15px; height:15px; }
 
-  @media (max-width:760px){
-    .layout{flex-direction:column; align-items:center;}
-    .roster-panel{max-width:360px; width:100%;}
+  .role-row{
+    display:flex; align-items:center; gap:12px; padding:10px 12px;
+    border:1px solid var(--line); border-radius:8px; margin-bottom:8px;
+    background: rgba(255,255,255,0.02);
   }
-  @media (prefers-reduced-motion:reduce){
-    .spinning-ring{animation:none;}
-    .count-num, .reveal-card{animation:none;}
+  .role-row .rn{ flex:1; min-width:0; }
+  .role-row .rn .name{ font-weight:700; font-size:0.92rem; }
+  .role-row .rn .team{ font-size:0.75rem; color: rgba(243,233,210,0.5); }
+  .role-row select{
+    font-family:'Manrope', sans-serif; font-weight:600; font-size:0.85rem;
+    background: var(--ink-2); color: var(--cream); border:1px solid var(--line);
+    border-radius:6px; padding:7px 10px;
+  }
+  .role-row .ptspreview{ min-width:52px; text-align:right; font-weight:700; color: var(--gold-soft); font-size:0.9rem; }
+
+  .role-counts{ font-size:0.8rem; color: rgba(243,233,210,0.55); margin: 10px 0; }
+  .role-counts .warn{ color: var(--crimson); }
+
+  .toggle-pair{ display:flex; gap:10px; margin: 12px 0; }
+  .toggle-pair button{
+    flex:1; padding:14px; border-radius:8px; font-family:'Manrope', sans-serif;
+    font-weight:700; font-size:0.9rem; cursor:pointer; border:1px solid var(--line);
+    background: rgba(255,255,255,0.02); color: var(--cream);
+  }
+  .toggle-pair button.sel-yes.on{ background: rgba(46,125,107,0.22); border-color: var(--teal); color:#BFE9DD; }
+  .toggle-pair button.sel-no.on{ background: rgba(165,49,63,0.2); border-color: var(--crimson); color:#F2C6CB; }
+
+  .inline-msg{ font-size:0.85rem; color: var(--crimson); margin: 8px 0 0; min-height:1.2em; }
+
+  .history-item{
+    border-left: 2px solid var(--line); padding: 6px 0 6px 14px; margin-bottom:10px; font-size:0.85rem;
+  }
+  .history-item .hh{ color: var(--gold-soft); font-weight:700; }
+  .history-item .entries{ color: rgba(243,233,210,0.7); margin-top:3px; }
+
+  /* ---------- wheel ---------- */
+  .wheel-wrap{ display:flex; gap:32px; flex-wrap:wrap; align-items:center; justify-content:center; }
+  .wheel-stage{ position:relative; width:340px; height:340px; flex-shrink:0; }
+  .wheel-pointer{
+    position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent;
+    border-top: 24px solid var(--gold); z-index:5; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+  }
+  .wheel-disc{ width:340px; height:340px; transform: rotate(0deg); }
+  .wheel-hub{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:56px; height:56px; border-radius:50%; background: var(--gold);
+    border: 3px solid var(--ink); display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-weight:700; color: var(--ink); font-size:0.72rem; z-index:4;
+  }
+  .wheel-side{ min-width:240px; flex:1; }
+  .wheel-side label{ font-size:0.82rem; color: rgba(243,233,210,0.6); display:block; margin-bottom:6px; }
+  .wheel-side input[type=text]{
+    width:100%; font-family:'Manrope'; font-size:0.95rem; padding:10px 12px;
+    background: var(--ink-2); border:1px solid var(--line); border-radius:8px; color:var(--cream);
+    margin-bottom:14px;
+  }
+  .reveal{
+    margin-top:16px; padding:18px 20px; border-radius: var(--radius);
+    border:1px solid var(--gold); background: rgba(216,170,70,0.1);
+    animation: pop .35s ease;
+  }
+  .reveal.bad{ border-color: var(--crimson); background: rgba(165,49,63,0.1); }
+  .reveal.again{ border-color: var(--teal); background: rgba(46,125,107,0.1); }
+  .reveal .rtitle{ font-family:'Fraunces', serif; font-size:1.3rem; font-weight:600; color: var(--gold-soft); }
+  .reveal.bad .rtitle{ color:#E9AEB4; }
+  .reveal.again .rtitle{ color:#9FDCC9; }
+  .reveal .rsub{ font-size:0.85rem; color: rgba(243,233,210,0.65); margin-top:4px; }
+  @keyframes pop{ from{opacity:0; transform:scale(0.96);} to{opacity:1; transform:scale(1);} }
+
+  .spin-log{ margin-top:16px; font-size:0.82rem; color: rgba(243,233,210,0.6); }
+  .spin-log div{ padding:5px 0; border-bottom:1px solid rgba(216,170,70,0.1); }
+
+  /* ---------- settings ---------- */
+  .points-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap:12px; margin-bottom:14px; }
+  .points-grid div{ display:flex; flex-direction:column; gap:6px; }
+  .points-grid label{ font-size:0.78rem; color: rgba(243,233,210,0.55); }
+  .points-grid input{
+    background: var(--ink-2); border:1px solid var(--line); border-radius:6px; color:var(--cream);
+    padding:8px 10px; font-family:'Manrope'; font-weight:700; font-size:0.95rem;
+  }
+  .roster-manage-row{
+    display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid rgba(216,170,70,0.1);
+    font-size:0.88rem;
+  }
+  .roster-manage-row .team{ font-size:0.75rem; color: rgba(243,233,210,0.5); flex:0 0 130px; }
+  .roster-manage-row .name{ flex:1; }
+  .add-row{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  .add-row input[type=text]{
+    flex:1; min-width:180px; background: var(--ink-2); border:1px solid var(--line); border-radius:6px;
+    color:var(--cream); padding:9px 12px; font-family:'Manrope';
+  }
+  .add-row select{
+    background: var(--ink-2); border:1px solid var(--line); border-radius:6px; color:var(--cream);
+    padding:9px 12px; font-family:'Manrope';
+  }
+  .danger-zone{ border-color: rgba(165,49,63,0.4); }
+  .empty{ color: rgba(243,233,210,0.4); font-size:0.85rem; padding: 10px 0; }
+
+  @media (max-width: 760px){
+    .team-row{ grid-template-columns: 1fr; }
+    .roster-grid{ grid-template-columns: 1fr; }
+    .points-grid{ grid-template-columns: repeat(2,1fr); }
+    .wheel-wrap{ flex-direction:column; }
   }
 </style>
 </head>
 <body>
 
-<div class="stage">
-  <div class="top">
-    <h1>CALL CENTER SPIN WHEEL</h1>
-    <p>Spin to put colleague into spot light!</p>
-  </div>
+<div class="shell">
 
-  <div class="layout">
-    <div class="wheel-panel">
-      <div id="ringWrap">
-        <div id="pointer"></div>
-        <svg id="wheel" viewBox="0 0 300 300">
-          <g id="segments"></g>
-          <circle id="hub" cx="150" cy="150" r="24"/>
-        </svg>
-        <div id="countdownLayer"></div>
-        <div id="revealWrap"></div>
+  <header class="hero">
+    <div class="titles">
+      <h1 class="display">Show Me the Thief</h1>
+      <p>Gummite · Deal Sealers · Victory Vault — live scoreboard</p>
+    </div>
+    <div class="roundtag" id="roundTag">Round 1</div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="board" class="active">Leaderboard</button>
+    <button data-tab="round">Play Round</button>
+    <button data-tab="wheel">Prize Wheel</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+
+  <!-- LEADERBOARD -->
+  <section class="tabpanel active" id="tab-board">
+    <div id="championSlot"></div>
+    <div class="team-row" id="teamRow"></div>
+    <div class="panel">
+      <h2>Standings</h2>
+      <p class="sub">Every representative who has played, ranked by total points.</p>
+      <div id="boardList"></div>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-gold" id="crownBtn">Crown Champion 👑</button>
       </div>
-      <button id="spinBtn">Spin the wheel</button>
-      <button id="resetBtn">Reset the round</button>
-      <div id="roundBanner"></div>
+    </div>
+  </section>
+
+  <!-- PLAY ROUND -->
+  <section class="tabpanel" id="tab-round">
+    <div class="panel">
+      <h2>Pick who's playing this round</h2>
+      <p class="sub">Tick everyone who drew a paper this round, from any team.</p>
+      <div class="roster-grid" id="rosterGrid"></div>
     </div>
 
-    <aside class="roster-panel">
-      <h2>Roster — spins remaining</h2>
-      <div class="roster-list" id="rosterList"></div>
-    </aside>
-  </div>
+    <div class="panel" id="roleAssignPanel" style="display:none;">
+      <h2>Reveal their papers</h2>
+      <p class="sub">Assign the role each person actually picked.</p>
+      <div id="roleRows"></div>
+      <div class="role-counts" id="roleCounts"></div>
+      <div id="wisemanToggleWrap"></div>
+      <div class="inline-msg" id="roundMsg"></div>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-gold" id="saveRoundBtn">Save Round</button>
+        <button class="btn btn-ghost" id="clearRoundBtn">Clear Selection</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Round history</h2>
+      <button class="btn btn-danger btn-sm" id="undoBtn" style="margin-bottom:12px;">Undo Last Round</button>
+      <div id="historyList"></div>
+    </div>
+  </section>
+
+  <!-- WHEEL -->
+  <section class="tabpanel" id="tab-wheel">
+    <div class="panel">
+      <h2>Spin for the prize</h2>
+      <p class="sub">UGX 10,000 · 5,000 · 4,000 · 3,000 · 2,000 · 1,000 · Spin Again · Better Luck Next Time</p>
+      <div class="wheel-wrap">
+        <div class="wheel-stage">
+          <div class="wheel-pointer"></div>
+          <svg class="wheel-disc" id="wheelDisc" viewBox="0 0 340 340"></svg>
+          <div class="wheel-hub">SPIN</div>
+        </div>
+        <div class="wheel-side">
+          <label for="spinName">Spinning for</label>
+          <input type="text" id="spinName" placeholder="Champion's name">
+          <button class="btn btn-gold" id="spinBtn" style="width:100%;">Spin the Wheel</button>
+          <div id="revealSlot"></div>
+          <div class="spin-log" id="spinLog"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="tabpanel" id="tab-settings">
+    <div class="panel">
+      <h2>Role points</h2>
+      <p class="sub">Applies to rounds saved after you hit Save — earlier rounds keep their original points.</p>
+      <div class="points-grid" id="pointsGrid"></div>
+      <button class="btn btn-gold btn-sm" id="savePointsBtn">Save Points</button>
+    </div>
+
+    <div class="panel">
+      <h2>Roster</h2>
+      <p class="sub">Add or remove representatives.</p>
+      <div id="rosterManageList"></div>
+      <div class="add-row">
+        <input type="text" id="newName" placeholder="Full name">
+        <select id="newTeam"></select>
+        <button class="btn btn-ghost" id="addPlayerBtn">Add Player</button>
+      </div>
+    </div>
+
+    <div class="panel danger-zone">
+      <h2>Danger zone</h2>
+      <p class="sub">These affect everyone's scores. Use with care during a live game.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-danger" id="resetScoresBtn">Reset All Scores</button>
+        <button class="btn btn-danger" id="fullResetBtn">Full Reset (roster + scores)</button>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <script>
-/* ---------- Roster & color assignment ---------- */
-const rawNames = [
-  "Milly Nakkazi", "Florence Kaudha", "Mercy Atusasiire", "Manita Joan",
-  "Akademere Stella Slyvia", "GraceMary Nakabiito", "Flavia Nangonzi",
-  "Racheal Nabyonga Kisakye", "Sarah Akello Flishia", "Gloria Nahirya",
-  "Angella Athieno", "Elizabeth Akampurira", "Kenneth Birungi", "Babirye Violla",
-  "Natasha Nakiyaga", "Patience Nyamwiza", "David Wasen", "Elizabeth Kemigisa",
-  "Oliver Natoolo", "Emily Namara", "Anitah Nalugwa", "Birungi Nuwagaba",
-  "Beatrice Nakkazi", "Arthur Ssemwezzi", "Rinah Kabahuma", "Jupiter Atuhaire",
-  "Irene Nabagala", "Babra Nazziwa", "Nalumansi Josephine", "Raymond Twino",
-  "Rachael Nankya", "Doreen Kyasiimire", "Frank Mugoloza", "Peter Kakuru",
-  "Apio Cissy", "Godivah Ampumuza", "Abesiga Muhabuzi", "Martin Tweteise",
-  "Latifa Apio", "Namatovu Rachel", "Priscilla Nakimbugwe", "Allan Otim",
-  "Fatumah Arinaitwe", "Daphine Nanyonjo", "Asuman",
-  "Emmanuel", "Jovia", "Jonathan","Phionah","Patricia"
-];
+(function(){
+  "use strict";
 
-function colorForIndex(i){
-  const hue = (206 + i * 137.508) % 360;
-  const light = 38 + (i % 3) * 6; // 38 / 44 / 50
-  return `hsl(${hue.toFixed(1)} 62% ${light}%)`;
-}
+  var STORAGE_KEY = "smtt_state_v2";
 
-function initialsFor(name){
-  const tokens = name.trim().split(/\s+/).filter(Boolean);
-  if (tokens.length === 1) return (tokens[0][0] + (tokens[0][1] || '')).toUpperCase();
-  return (tokens[0][0] + tokens[tokens.length - 1][0]).toUpperCase();
-}
+  var DEFAULT_ROSTER = [
+    ["Mercy Atusasiire","Gummite"], ["Angella Athieno","Gummite"], ["Natasha Nakiyaga","Gummite"],
+    ["David Wasen","Gummite"], ["Oliver Natoolo","Gummite"], ["Birungi Nuwagaba","Gummite"],
+    ["Babirye Violla","Deal Sealers"], ["Elizabeth Akampurira","Deal Sealers"], ["Anitah Nalugwa","Deal Sealers"],
+    ["Patience Nyamwiza","Deal Sealers"], ["Elizabeth Kemigisa","Deal Sealers"], ["Gloria Nahirya","Deal Sealers"],
+    ["Emily Namara","Deal Sealers"], ["Racheal Nabyonga Kisakye","Deal Sealers"],
+    ["Kenneth Birungi","Victory Vault"], ["Akademere Stella Slyvia","Victory Vault"], ["Florence Kaudha","Victory Vault"],
+    ["GraceMary Nakabiito","Victory Vault"], ["Milly Nakkazi","Victory Vault"], ["Sarah Akello Flishia","Victory Vault"],
+    ["Manita Joan","Victory Vault"]
+  ];
 
-const MAX_TURNS = 2;
-const masterPool = rawNames.map((name, i) => ({
-  name,
-  color: colorForIndex(i),
-  remaining: MAX_TURNS
-}));
+  var TEAMS = ["Gummite","Deal Sealers","Victory Vault"];
+  var TEAM_ACCENT = { "Gummite":"var(--gold)", "Deal Sealers":"var(--teal)", "Victory Vault":"var(--crimson)" };
+  var ROLES = ["King","Queen","Wiseman","Servant","Thief"];
+  var SEGMENTS = [
+    {label:"10,000", type:"prize"}, {label:"Spin Again", type:"again"},
+    {label:"5,000", type:"prize"}, {label:"1,000", type:"prize"},
+    {label:"Better Luck Next Time", type:"bad"}, {label:"4,000", type:"prize"},
+    {label:"2,000", type:"prize"}, {label:"3,000", type:"prize"}
+  ];
+  var SEGMENT_COLORS = ["var(--gold)","var(--teal)","var(--crimson)","var(--plum-light)",
+                         "var(--gold-soft)","var(--teal-dark)","var(--crimson-dark)","var(--plum)"];
 
-/* ---------- Wheel state ---------- */
-const wheel = document.getElementById('wheel');
-const segEl = document.getElementById('segments');
-const btn = document.getElementById('spinBtn');
-const resetBtn = document.getElementById('resetBtn');
-const roundBanner = document.getElementById('roundBanner');
-const revealWrap = document.getElementById('revealWrap');
-const ringWrap = document.getElementById('ringWrap');
-const countdownLayer = document.getElementById('countdownLayer');
-const rosterList = document.getElementById('rosterList');
+  function defaultState(){
+    var players = {};
+    DEFAULT_ROSTER.forEach(function(p){ players[p[0]] = { team: p[1], total: 0 }; });
+    return {
+      rolePoints: { King:100, Queen:100, Wiseman:90, Servant:60, Thief:0 },
+      players: players,
+      rounds: [],
+      roundCounter: 1,
+      champion: null,
+      spins: []
+    };
+  }
 
-let activeList = [];
-let seg = 0;
-let n = 0;
-let rotation = 0;
-let spinning = false;
-let colorFlashTimer = null;
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      if(!parsed.players || !parsed.rolePoints) return defaultState();
+      return parsed;
+    }catch(e){ return defaultState(); }
+  }
 
-function toRad(a){ return (a - 90) * Math.PI / 180; }
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
 
-function fontSizeFor(name){
-  const len = name.length;
-  if (len <= 12) return 10.5;
-  if (len <= 18) return 9.5;
-  if (len <= 24) return 8.2;
-  return 7.2;
-}
+  var state = load();
 
-function buildWheel(){
-  activeList = masterPool.filter(p => p.remaining > 0);
-  n = activeList.length;
-  seg = n ? 360 / n : 360;
-  segEl.innerHTML = '';
+  // ephemeral round-builder state (not persisted)
+  var draft = { selected: [], roles: {}, wisemanCorrect: null };
+  var spinning = false;
+  var currentRotation = 0;
 
-  activeList.forEach((item, i) => {
-    const startAngle = i * seg;
-    const endAngle = startAngle + seg;
-    const x1 = 150 + 140 * Math.cos(toRad(startAngle));
-    const y1 = 150 + 140 * Math.sin(toRad(startAngle));
-    const x2 = 150 + 140 * Math.cos(toRad(endAngle));
-    const y2 = 150 + 140 * Math.sin(toRad(endAngle));
-    const largeArc = seg > 180 ? 1 : 0;
+  // ---------- helpers ----------
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', `M150,150 L${x1},${y1} A140,140 0 ${largeArc},1 ${x2},${y2} Z`);
-    path.setAttribute('fill', item.color);
-    path.setAttribute('stroke', 'var(--bg-deep)');
-    path.setAttribute('stroke-width', '1');
-    segEl.appendChild(path);
+  function rankedPlayers(){
+    return Object.keys(state.players)
+      .map(function(name){ return { name:name, team: state.players[name].team, total: state.players[name].total }; })
+      .sort(function(a,b){ return b.total - a.total || a.name.localeCompare(b.name); });
+  }
 
-    const midAngle = startAngle + seg / 2;
-    const innerR = 44;
-    const tx = 150 + innerR * Math.cos(toRad(midAngle));
-    const ty = 150 + innerR * Math.sin(toRad(midAngle));
-    const rotateDeg = midAngle - 90;
+  function teamTotals(){
+    var totals = {}; TEAMS.forEach(function(t){ totals[t] = { total:0, count:0 }; });
+    Object.keys(state.players).forEach(function(name){
+      var p = state.players[name];
+      if(!totals[p.team]) totals[p.team] = { total:0, count:0 };
+      totals[p.team].total += p.total; totals[p.team].count += 1;
+    });
+    return totals;
+  }
 
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', tx);
-    text.setAttribute('y', ty);
-    text.setAttribute('fill', '#ffffff');
-    text.setAttribute('font-size', fontSizeFor(item.name));
-    text.setAttribute('font-family', "'Inter', sans-serif");
-    text.setAttribute('font-weight', '600');
-    text.setAttribute('dominant-baseline', 'middle');
-    text.setAttribute('transform', `rotate(${rotateDeg}, ${tx}, ${ty})`);
-    text.textContent = item.name;
-    segEl.appendChild(text);
+  // ---------- tabs ----------
+  document.querySelectorAll("nav.tabs button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      document.querySelectorAll("nav.tabs button").forEach(function(b){ b.classList.remove("active"); });
+      document.querySelectorAll(".tabpanel").forEach(function(p){ p.classList.remove("active"); });
+      btn.classList.add("active");
+      el("tab-" + btn.dataset.tab).classList.add("active");
+      if(btn.dataset.tab === "wheel" && state.champion && !el("spinName").value){
+        el("spinName").value = state.champion;
+      }
+    });
   });
-}
 
-function renderRoster(){
-  rosterList.innerHTML = '';
-  masterPool.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'roster-row' + (item.remaining === 0 ? ' exhausted' : '');
-    const dot = document.createElement('span');
-    dot.className = 'roster-dot';
-    dot.style.background = item.color;
-    const nameEl = document.createElement('span');
-    nameEl.className = 'roster-name';
-    nameEl.textContent = item.name;
-    const pips = document.createElement('span');
-    pips.className = 'pips';
-    for (let p = 0; p < MAX_TURNS; p++) {
-      const pip = document.createElement('span');
-      pip.className = 'pip' + (p < item.remaining ? ' filled' : '');
-      pips.appendChild(pip);
-    }
-    row.appendChild(dot);
-    row.appendChild(nameEl);
-    row.appendChild(pips);
-    rosterList.appendChild(row);
-  });
-}
+  // ---------- LEADERBOARD ----------
+  function renderBoard(){
+    el("roundTag").textContent = "Round " + state.roundCounter;
 
-function checkRoundState(){
-  const anyLeft = masterPool.some(p => p.remaining > 0);
-  btn.disabled = !anyLeft;
-  roundBanner.textContent = anyLeft ? '' : 'Everyone\u2019s had two turns \u2014 reset to spin again.';
-}
+    var totals = teamTotals();
+    el("teamRow").innerHTML = TEAMS.map(function(t){
+      var d = totals[t] || {total:0,count:0};
+      return '<div class="team-card" style="--accent:' + TEAM_ACCENT[t] + '">' +
+        '<div class="tname display">' + esc(t) + '</div>' +
+        '<div class="tmeta">' + d.count + ' representative' + (d.count===1?'':'s') + '</div>' +
+        '<div class="ttotal">' + d.total + '</div>' +
+      '</div>';
+    }).join("");
 
-/* ---------- Audio engine ---------- */
-let audioCtx = null;
-
-function kick(t){
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.frequency.setValueAtTime(140, t);
-  o.frequency.exponentialRampToValueAtTime(45, t + 0.15);
-  g.gain.setValueAtTime(0.25, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(t); o.stop(t + 0.25);
-}
-function makeNoiseBuffer(seconds){
-  const bufferSize = Math.floor(audioCtx.sampleRate * seconds);
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-  return buffer;
-}
-function hat(t){
-  const src = audioCtx.createBufferSource();
-  src.buffer = makeNoiseBuffer(0.05);
-  const g = audioCtx.createGain();
-  g.gain.setValueAtTime(0.06, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-  src.connect(g); g.connect(audioCtx.destination);
-  src.start(t);
-}
-function tick(){
-  if (!audioCtx) return;
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.frequency.value = 900; o.type = 'square';
-  g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime + 0.05);
-}
-function countBeep(t){
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.frequency.value = 520; o.type = 'sine';
-  g.gain.setValueAtTime(0.001, t);
-  g.gain.exponentialRampToValueAtTime(0.15, t + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(t); o.stop(t + 0.22);
-}
-function startBeat(duration){
-  const startT = audioCtx.currentTime + 0.05;
-  const bpm = 128; const beatLen = 60 / bpm;
-  const totalBeats = Math.floor(duration / (beatLen * 1000));
-  for (let b = 0; b < totalBeats; b++) {
-    const t = startT + b * beatLen;
-    kick(t); hat(t + beatLen / 2);
-  }
-}
-function dropSound(){
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.type = 'sawtooth';
-  o.frequency.setValueAtTime(400, audioCtx.currentTime);
-  o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.6);
-  g.gain.setValueAtTime(0.001, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.05);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime + 0.7);
-}
-function celebrationPop(t, pitch){
-  const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-  o.type = 'sine';
-  o.frequency.setValueAtTime(pitch, t);
-  o.frequency.exponentialRampToValueAtTime(pitch * 0.45, t + 0.09);
-  g.gain.setValueAtTime(0.001, t);
-  g.gain.linearRampToValueAtTime(0.22, t + 0.008);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(t); o.stop(t + 0.12);
-
-  const clickSrc = audioCtx.createBufferSource();
-  clickSrc.buffer = makeNoiseBuffer(0.015);
-  const clickFilt = audioCtx.createBiquadFilter();
-  clickFilt.type = 'highpass'; clickFilt.frequency.value = 3000;
-  const clickGain = audioCtx.createGain();
-  clickGain.gain.setValueAtTime(0.15, t);
-  clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
-  clickSrc.connect(clickFilt); clickFilt.connect(clickGain); clickGain.connect(audioCtx.destination);
-  clickSrc.start(t); clickSrc.stop(t + 0.02);
-}
-function crowdCheer(){
-  const t0 = audioCtx.currentTime; const dur = 2.2;
-  const roarSrc = audioCtx.createBufferSource();
-  roarSrc.buffer = makeNoiseBuffer(dur);
-  const roarGain = audioCtx.createGain();
-  roarGain.gain.setValueAtTime(0.001, t0);
-  roarGain.gain.exponentialRampToValueAtTime(0.14, t0 + 0.25);
-  roarGain.gain.setValueAtTime(0.14, t0 + 1.0);
-  roarGain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
-  [800, 1400, 2200].forEach(freq => {
-    const filt = audioCtx.createBiquadFilter();
-    filt.type = 'bandpass'; filt.frequency.value = freq; filt.Q.value = 0.7;
-    roarSrc.connect(filt); filt.connect(roarGain);
-  });
-  roarGain.connect(audioCtx.destination);
-  roarSrc.start(t0); roarSrc.stop(t0 + dur);
-
-  for (let i = 0; i < 20; i++) {
-    const ct = t0 + 0.08 + Math.random() * 1.5;
-    const clapSrc = audioCtx.createBufferSource();
-    clapSrc.buffer = makeNoiseBuffer(0.05);
-    const clapFilt = audioCtx.createBiquadFilter();
-    clapFilt.type = 'bandpass'; clapFilt.frequency.value = 2200 + Math.random() * 1800; clapFilt.Q.value = 2.5;
-    const clapFilt2 = audioCtx.createBiquadFilter();
-    clapFilt2.type = 'highpass'; clapFilt2.frequency.value = 1500;
-    const clapGain = audioCtx.createGain();
-    clapGain.gain.setValueAtTime(0.001, ct);
-    clapGain.gain.linearRampToValueAtTime(0.38, ct + 0.004);
-    clapGain.gain.exponentialRampToValueAtTime(0.001, ct + 0.07);
-    clapSrc.connect(clapFilt); clapFilt.connect(clapFilt2); clapFilt2.connect(clapGain); clapGain.connect(audioCtx.destination);
-    clapSrc.start(ct); clapSrc.stop(ct + 0.07);
-  }
-  const popPitches = [900, 1100, 1300, 1500, 1700];
-  for (let i = 0; i < 9; i++) {
-    const pt = t0 + 0.05 + Math.random() * 1.6;
-    celebrationPop(pt, popPitches[Math.floor(Math.random() * popPitches.length)]);
-  }
-}
-
-let femaleVoice = null;
-function pickFemaleVoice(){
-  if (!('speechSynthesis' in window)) return;
-  const voices = window.speechSynthesis.getVoices();
-  femaleVoice = voices.find(v => /female/i.test(v.name))
-    || voices.find(v => /(samantha|victoria|zira|susan|karen|moira|tessa|fiona|google uk english female|google us english)/i.test(v.name))
-    || voices.find(v => v.lang && v.lang.startsWith('en'))
-    || voices[0] || null;
-}
-if ('speechSynthesis' in window) {
-  pickFemaleVoice();
-  window.speechSynthesis.onvoiceschanged = pickFemaleVoice;
-}
-function announce(text){
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  if (femaleVoice) utter.voice = femaleVoice;
-  utter.pitch = 1.1; utter.rate = 0.97;
-  window.speechSynthesis.speak(utter);
-}
-
-function burstConfetti(container, color){
-  const colors = ['#F2B84B', '#F7D48A', '#ffffff', color];
-  for (let i = 0; i < 40; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti';
-    const angle = Math.random() * Math.PI * 2;
-    const dist = 90 + Math.random() * 110;
-    p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
-    p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
-    p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
-    p.style.background = colors[Math.floor(Math.random() * colors.length)];
-    p.style.animationDelay = (Math.random() * 0.15) + 's';
-    container.appendChild(p);
-    setTimeout(() => p.remove(), 1400);
-  }
-}
-
-/* ---------- Spin mechanics ---------- */
-function showCountNumber(num, t){
-  setTimeout(() => {
-    countdownLayer.innerHTML = '<div class="count-num">' + num + '</div>';
-    if (audioCtx) countBeep(audioCtx.currentTime);
-  }, t);
-}
-
-function angleToIndex(rot){
-  const pointerOriginalAngle = ((360 - (rot % 360)) % 360 + 360) % 360;
-  return Math.floor(pointerOriginalAngle / seg) % n;
-}
-
-btn.onclick = () => {
-  if (spinning || n === 0) return;
-  spinning = true;
-  revealWrap.innerHTML = '';
-  countdownLayer.innerHTML = '';
-  roundBanner.textContent = '';
-  wheel.classList.remove('wheel-blurred');
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  btn.disabled = true;
-  btn.style.opacity = '0.6';
-  resetBtn.disabled = true;
-
-  const duration = 7800;
-  startBeat(duration);
-  ringWrap.classList.add('spinning-ring');
-  let flashIdx = 0;
-  const flashColors = activeList.map(it => it.color);
-  colorFlashTimer = setInterval(() => {
-    ringWrap.style.setProperty('--glow-color', flashColors[flashIdx % flashColors.length]);
-    flashIdx++;
-  }, 180);
-
-  showCountNumber(3, duration - 3000);
-  showCountNumber(2, duration - 2000);
-  showCountNumber(1, duration - 1000);
-
-  const extraSpins = 10 + Math.random() * 3;
-  const randomOffset = Math.random() * 360;
-  const startRotation = rotation;
-  const baseFull = startRotation - (startRotation % 360);
-  const finalRotation = baseFull + extraSpins * 360 + randomOffset;
-  const delta = finalRotation - startRotation;
-  const startTime = performance.now();
-  let lastTickSeg = -1;
-
-  function animate(now){
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 4.2);
-    const current = startRotation + delta * eased;
-    wheel.style.transform = `rotate(${current}deg)`;
-    const segNow = angleToIndex(current);
-    if (segNow !== lastTickSeg) { tick(); lastTickSeg = segNow; }
-    if (progress < 1) {
-      requestAnimationFrame(animate);
+    var ranked = rankedPlayers();
+    if(ranked.length === 0){
+      el("boardList").innerHTML = '<div class="empty">No representatives yet — add some in Settings.</div>';
     } else {
-      rotation = finalRotation;
-      spinning = false;
-      resetBtn.disabled = false;
-      ringWrap.classList.remove('spinning-ring');
-      ringWrap.style.boxShadow = 'none';
-      countdownLayer.innerHTML = '';
-      clearInterval(colorFlashTimer);
-      dropSound();
-      crowdCheer();
+      el("boardList").innerHTML = ranked.map(function(p, i){
+        var isLead = i === 0 && p.total > 0;
+        return '<div class="board-row' + (isLead?' lead':'') + '">' +
+          '<div class="rank">' + (isLead ? '👑' : (i+1)) + '</div>' +
+          '<div class="who">' +
+            '<div class="name">' + esc(p.name) + '</div>' +
+            '<div class="team"><span class="dot" style="--accent:' + TEAM_ACCENT[p.team] + '"></span>' + esc(p.team) + '</div>' +
+          '</div>' +
+          '<div class="pts">' + p.total + '</div>' +
+        '</div>';
+      }).join("");
+    }
 
-      const winningIndex = angleToIndex(finalRotation);
-      const picked = activeList[winningIndex];
-      picked.remaining -= 1;
-
-      wheel.classList.add('wheel-blurred');
-      const firstName = picked.name.split(' ')[0];
-      const remainingLabel = picked.remaining === 0
-        ? 'That was their second turn — sitting out the rest of this round.'
-        : `${picked.remaining} spin left this round.`;
-
-      revealWrap.innerHTML = `
-        <div class="reveal-card">
-          <div class="avatar" style="background:${picked.color};">${initialsFor(picked.name)}</div>
-          <p class="reveal-eyebrow">In the spotlight</p>
-          <p class="reveal-name">${picked.name}</p>
-          <p class="reveal-sub">${remainingLabel}</p>
-        </div>
-      `;
-      burstConfetti(revealWrap, picked.color);
-      announce(`${firstName} is in the spotlight!`);
-
-      renderRoster();
-      buildWheel();
-      checkRoundState();
-      btn.style.opacity = '1';
+    if(state.champion && state.players[state.champion]){
+      el("championSlot").innerHTML =
+        '<div class="champion-banner">' +
+          '<div class="ctext">👑 <b>' + esc(state.champion) + '</b> has been crowned champion.</div>' +
+          '<button class="btn btn-gold btn-sm" id="goWheelBtn">Send to Prize Wheel →</button>' +
+        '</div>';
+      el("goWheelBtn").addEventListener("click", function(){
+        document.querySelector('nav.tabs button[data-tab="wheel"]').click();
+        el("spinName").value = state.champion;
+      });
+    } else {
+      el("championSlot").innerHTML = "";
     }
   }
-  requestAnimationFrame(animate);
-};
 
-resetBtn.onclick = () => {
-  if (spinning) return;
-  masterPool.forEach(p => p.remaining = MAX_TURNS);
-  revealWrap.innerHTML = '';
-  wheel.classList.remove('wheel-blurred');
-  rotation = 0;
-  wheel.style.transform = 'rotate(0deg)';
-  renderRoster();
+  el("crownBtn").addEventListener("click", function(){
+    var ranked = rankedPlayers();
+    if(ranked.length === 0 || ranked[0].total === 0){
+      alert("No points recorded yet — play a round first.");
+      return;
+    }
+    state.champion = ranked[0].name;
+    save(); renderBoard();
+  });
+
+  // ---------- ROUND ENTRY ----------
+  function renderRosterGrid(){
+    el("rosterGrid").innerHTML = TEAMS.map(function(t){
+      var names = Object.keys(state.players).filter(function(n){ return state.players[n].team === t; }).sort();
+      var rows = names.map(function(n){
+        var checked = draft.selected.indexOf(n) > -1;
+        return '<label class="' + (checked?'checked':'') + '" style="--accent:' + TEAM_ACCENT[t] + '">' +
+          '<input type="checkbox" data-name="' + esc(n) + '" ' + (checked?'checked':'') + '> ' + esc(n) +
+        '</label>';
+      }).join("");
+      return '<div class="roster-col">' +
+        '<h3 style="--accent:' + TEAM_ACCENT[t] + '"><span class="dot" style="--accent:' + TEAM_ACCENT[t] + '"></span>' + esc(t) + '</h3>' +
+        (rows || '<div class="empty">No one on this team yet.</div>') +
+      '</div>';
+    }).join("");
+
+    el("rosterGrid").querySelectorAll('input[type=checkbox]').forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var name = cb.dataset.name;
+        if(cb.checked){
+          if(draft.selected.indexOf(name) === -1) draft.selected.push(name);
+        } else {
+          draft.selected = draft.selected.filter(function(n){ return n !== name; });
+          delete draft.roles[name];
+        }
+        renderRosterGrid();
+        renderRoleAssign();
+      });
+    });
+  }
+
+  function roleCounts(){
+    var counts = {}; ROLES.forEach(function(r){ counts[r] = 0; });
+    draft.selected.forEach(function(n){
+      var r = draft.roles[n];
+      if(r) counts[r] = (counts[r]||0) + 1;
+    });
+    return counts;
+  }
+
+  function needsToggle(){
+    var hasWiseman = draft.selected.some(function(n){ return draft.roles[n] === "Wiseman"; });
+    var hasThief = draft.selected.some(function(n){ return draft.roles[n] === "Thief"; });
+    return hasWiseman && hasThief;
+  }
+
+  function previewPoints(name){
+    var role = draft.roles[name];
+    if(!role) return null;
+    var pts = state.rolePoints[role] || 0;
+    if(needsToggle()){
+      if(role === "Wiseman") pts = draft.wisemanCorrect === true ? state.rolePoints.Wiseman : (draft.wisemanCorrect === false ? 0 : null);
+      if(role === "Thief") pts = draft.wisemanCorrect === true ? state.rolePoints.Thief : (draft.wisemanCorrect === false ? state.rolePoints.Wiseman : null);
+    }
+    return pts;
+  }
+
+  function renderRoleAssign(){
+    var panel = el("roleAssignPanel");
+    if(draft.selected.length === 0){ panel.style.display = "none"; return; }
+    panel.style.display = "block";
+
+    el("roleRows").innerHTML = draft.selected.map(function(n){
+      var team = state.players[n].team;
+      var role = draft.roles[n] || "";
+      var options = '<option value="">— pick paper —</option>' + ROLES.map(function(r){
+        return '<option value="' + r + '" ' + (role===r?'selected':'') + '>' + r + '</option>';
+      }).join("");
+      var pts = previewPoints(n);
+      return '<div class="role-row">' +
+        '<div class="rn"><div class="name">' + esc(n) + '</div><div class="team">' + esc(team) + '</div></div>' +
+        '<select data-name="' + esc(n) + '">' + options + '</select>' +
+        '<div class="ptspreview">' + (pts === null || pts === undefined ? '' : (pts>=0?'+':'') + pts) + '</div>' +
+      '</div>';
+    }).join("");
+
+    el("roleRows").querySelectorAll("select").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var name = sel.dataset.name;
+        if(sel.value) draft.roles[name] = sel.value; else delete draft.roles[name];
+        draft.wisemanCorrect = null;
+        renderRoleAssign();
+      });
+    });
+
+    var counts = roleCounts();
+    var warnParts = [];
+    ["King","Wiseman","Thief"].forEach(function(r){
+      if(counts[r] > 1) warnParts.push(r);
+    });
+    var countLine = ROLES.map(function(r){ return r + ": " + counts[r]; }).join(" · ");
+    el("roleCounts").innerHTML = countLine + (warnParts.length ? '<div class="warn">⚠ More than one ' + warnParts.join(", ") + ' assigned — double-check the papers.</div>' : "");
+
+    if(needsToggle()){
+      el("wisemanToggleWrap").innerHTML =
+        '<p class="sub" style="margin-top:10px;">Did the Wiseman correctly show the Thief?</p>' +
+        '<div class="toggle-pair">' +
+          '<button class="sel-yes ' + (draft.wisemanCorrect===true?'on':'') + '" id="wsYes">Yes — correct guess</button>' +
+          '<button class="sel-no ' + (draft.wisemanCorrect===false?'on':'') + '" id="wsNo">No — wrong guess</button>' +
+        '</div>';
+      el("wsYes").addEventListener("click", function(){ draft.wisemanCorrect = true; renderRoleAssign(); });
+      el("wsNo").addEventListener("click", function(){ draft.wisemanCorrect = false; renderRoleAssign(); });
+    } else {
+      el("wisemanToggleWrap").innerHTML = "";
+    }
+
+    el("roundMsg").textContent = "";
+  }
+
+  el("clearRoundBtn").addEventListener("click", function(){
+    draft = { selected: [], roles: {}, wisemanCorrect: null };
+    renderRosterGrid(); renderRoleAssign();
+  });
+
+  el("saveRoundBtn").addEventListener("click", function(){
+    if(draft.selected.length === 0) return;
+    var missing = draft.selected.filter(function(n){ return !draft.roles[n]; });
+    if(missing.length){
+      el("roundMsg").textContent = "Assign a paper to everyone before saving: " + missing.join(", ");
+      return;
+    }
+    if(needsToggle() && draft.wisemanCorrect === null){
+      el("roundMsg").textContent = "Select whether the Wiseman correctly showed the Thief.";
+      return;
+    }
+
+    var toggle = needsToggle() ? draft.wisemanCorrect : null;
+    var entries = draft.selected.map(function(n){
+      var role = draft.roles[n];
+      var pts = state.rolePoints[role] || 0;
+      if(toggle !== null){
+        if(role === "Wiseman") pts = toggle ? state.rolePoints.Wiseman : 0;
+        if(role === "Thief") pts = toggle ? state.rolePoints.Thief : state.rolePoints.Wiseman;
+      }
+      return { name:n, team: state.players[n].team, role: role, points: pts };
+    });
+
+    entries.forEach(function(e){ state.players[e.name].total += e.points; });
+
+    state.rounds.push({
+      id: state.roundCounter,
+      entries: entries,
+      wisemanCorrect: toggle,
+      time: new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})
+    });
+    state.roundCounter += 1;
+
+    draft = { selected: [], roles: {}, wisemanCorrect: null };
+    save();
+    renderRosterGrid(); renderRoleAssign(); renderBoard(); renderHistory();
+  });
+
+  el("undoBtn").addEventListener("click", function(){
+    var r = state.rounds.pop();
+    if(!r){ return; }
+    r.entries.forEach(function(e){
+      if(state.players[e.name]) state.players[e.name].total -= e.points;
+    });
+    state.roundCounter = Math.max(1, state.roundCounter - 1);
+    save();
+    renderBoard(); renderHistory();
+  });
+
+  function renderHistory(){
+    if(state.rounds.length === 0){
+      el("historyList").innerHTML = '<div class="empty">No rounds recorded yet.</div>';
+      return;
+    }
+    var rows = state.rounds.slice().reverse().map(function(r){
+      var entryText = r.entries.map(function(e){ return e.name + " (" + e.role + ", " + (e.points>=0?"+":"") + e.points + ")"; }).join(" · ");
+      var toggleNote = r.wisemanCorrect === true ? " — Wiseman guessed right" : (r.wisemanCorrect === false ? " — Wiseman guessed wrong" : "");
+      return '<div class="history-item"><span class="hh">Round ' + r.id + '</span> · ' + r.time + toggleNote +
+        '<div class="entries">' + esc(entryText) + '</div></div>';
+    }).join("");
+    el("historyList").innerHTML = rows;
+  }
+
+  // ---------- WHEEL ----------
+  function polarToCartesian(cx, cy, r, angleDeg){
+    var a = (angleDeg - 90) * Math.PI / 180;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  }
+
+  function buildWheel(){
+    var cx = 170, cy = 170, r = 165;
+    var segAngle = 360 / SEGMENTS.length;
+    var parts = SEGMENTS.map(function(seg, i){
+      var start = i * segAngle, end = (i+1) * segAngle;
+      var p0 = polarToCartesian(cx, cy, r, start);
+      var p1 = polarToCartesian(cx, cy, r, end);
+      var path = 'M ' + cx + ' ' + cy + ' L ' + p0.x.toFixed(2) + ' ' + p0.y.toFixed(2) +
+        ' A ' + r + ' ' + r + ' 0 0 1 ' + p1.x.toFixed(2) + ' ' + p1.y.toFixed(2) + ' Z';
+      var mid = start + segAngle/2;
+      var lp = polarToCartesian(cx, cy, r*0.62, mid);
+      var fontSize = seg.type === "prize" ? 15 : 10.5;
+      var fill = (seg.type === "bad") ? "#3a1f26" : (seg.type === "again" ? "#12261f" : "#1a1230");
+      return '<path d="' + path + '" fill="' + SEGMENT_COLORS[i % SEGMENT_COLORS.length] + '" stroke="#17112B" stroke-width="2"/>' +
+        '<text x="' + lp.x.toFixed(2) + '" y="' + lp.y.toFixed(2) + '" fill="' + fill + '" font-size="' + fontSize +
+        '" font-family="Manrope, sans-serif" font-weight="800" text-anchor="middle" dominant-baseline="middle" ' +
+        'transform="rotate(' + mid.toFixed(2) + ' ' + lp.x.toFixed(2) + ' ' + lp.y.toFixed(2) + ')">' + esc(seg.label) + '</text>';
+    }).join("");
+    el("wheelDisc").innerHTML = parts;
+  }
+
+  function renderSpinLog(){
+    if(state.spins.length === 0){ el("spinLog").innerHTML = ""; return; }
+    el("spinLog").innerHTML = state.spins.slice().reverse().slice(0,8).map(function(s){
+      return '<div>' + s.time + ' — <b>' + esc(s.name) + '</b> → ' + esc(s.result) + '</div>';
+    }).join("");
+  }
+
+  function showReveal(name, seg){
+    var cls = seg.type === "prize" ? "" : (seg.type === "bad" ? "bad" : "again");
+    var title, sub;
+    if(seg.type === "prize"){
+      title = "🎉 " + name + " wins UGX " + seg.label + "!";
+      sub = "Recorded in the spin log below.";
+    } else if(seg.type === "again"){
+      title = "🔁 Spin Again, " + name + "!";
+      sub = "Hit Spin the Wheel once more.";
+    } else {
+      title = "Better luck next time, " + name + ".";
+      sub = "That's how the wheel landed.";
+    }
+    el("revealSlot").innerHTML = '<div class="reveal ' + cls + '"><div class="rtitle display">' + esc(title) + '</div><div class="rsub">' + esc(sub) + '</div></div>';
+  }
+
+  el("spinBtn").addEventListener("click", function(){
+    if(spinning) return;
+    var name = el("spinName").value.trim() || "Contestant";
+    spinning = true;
+    el("spinBtn").disabled = true;
+
+    var segAngle = 360 / SEGMENTS.length;
+    var extraSpins = 6;
+    var randomAngle = Math.random() * 360;
+    var totalRotation = currentRotation + extraSpins*360 + randomAngle;
+    var wheelEl = el("wheelDisc");
+    wheelEl.style.transition = "transform 4.2s cubic-bezier(0.17,0.67,0.32,1.01)";
+    wheelEl.style.transform = "rotate(" + totalRotation + "deg)";
+    currentRotation = totalRotation;
+
+    function handler(){
+      wheelEl.removeEventListener("transitionend", handler);
+      var normalized = ((currentRotation % 360) + 360) % 360;
+      var pointerAngle = ((360 - normalized) % 360);
+      var index = Math.floor(pointerAngle / segAngle) % SEGMENTS.length;
+      var seg = SEGMENTS[index];
+      state.spins.push({ name:name, result: seg.label, time: new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) });
+      save();
+      showReveal(name, seg);
+      renderSpinLog();
+      spinning = false;
+      el("spinBtn").disabled = false;
+    }
+    wheelEl.addEventListener("transitionend", handler);
+  });
+
+  // ---------- SETTINGS ----------
+  function renderPointsGrid(){
+    el("pointsGrid").innerHTML = ROLES.map(function(r){
+      return '<div><label>' + r + '</label><input type="number" data-role="' + r + '" value="' + state.rolePoints[r] + '"></div>';
+    }).join("");
+  }
+  el("savePointsBtn").addEventListener("click", function(){
+    el("pointsGrid").querySelectorAll("input").forEach(function(inp){
+      var v = parseInt(inp.value, 10);
+      state.rolePoints[inp.dataset.role] = isNaN(v) ? 0 : v;
+    });
+    save();
+    renderPointsGrid();
+    alert("Role points saved. These apply from the next round you save.");
+  });
+
+  function renderRosterManage(){
+    var names = Object.keys(state.players).sort(function(a,b){
+      return state.players[a].team.localeCompare(state.players[b].team) || a.localeCompare(b);
+    });
+    el("rosterManageList").innerHTML = names.map(function(n){
+      return '<div class="roster-manage-row">' +
+        '<div class="team">' + esc(state.players[n].team) + '</div>' +
+        '<div class="name">' + esc(n) + ' <span style="color:rgba(243,233,210,0.5)">(' + state.players[n].total + ' pts)</span></div>' +
+        '<button class="btn btn-danger btn-sm" data-remove="' + esc(n) + '">Remove</button>' +
+      '</div>';
+    }).join("");
+    el("rosterManageList").querySelectorAll("[data-remove]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var n = btn.dataset.remove;
+        if(!confirm('Remove "' + n + '" from the roster? Their points will be lost.')) return;
+        delete state.players[n];
+        draft.selected = draft.selected.filter(function(x){ return x !== n; });
+        delete draft.roles[n];
+        save();
+        renderAll();
+      });
+    });
+
+    el("newTeam").innerHTML = TEAMS.map(function(t){ return '<option value="' + t + '">' + t + '</option>'; }).join("");
+  }
+
+  el("addPlayerBtn").addEventListener("click", function(){
+    var name = el("newName").value.trim();
+    var team = el("newTeam").value;
+    if(!name){ return; }
+    if(state.players[name]){ alert("That name is already on the roster."); return; }
+    state.players[name] = { team: team, total: 0 };
+    el("newName").value = "";
+    save();
+    renderAll();
+  });
+
+  el("resetScoresBtn").addEventListener("click", function(){
+    if(!confirm("Reset every score to zero and clear round history? The roster stays the same.")) return;
+    Object.keys(state.players).forEach(function(n){ state.players[n].total = 0; });
+    state.rounds = [];
+    state.roundCounter = 1;
+    state.champion = null;
+    state.spins = [];
+    save();
+    renderAll();
+  });
+
+  el("fullResetBtn").addEventListener("click", function(){
+    if(!confirm("This restores the original 21-person roster and wipes all scores and spins. Continue?")) return;
+    state = defaultState();
+    draft = { selected: [], roles: {}, wisemanCorrect: null };
+    save();
+    renderAll();
+  });
+
+  // ---------- render all ----------
+  function renderAll(){
+    renderBoard();
+    renderRosterGrid();
+    renderRoleAssign();
+    renderHistory();
+    renderPointsGrid();
+    renderRosterManage();
+    renderSpinLog();
+  }
+
   buildWheel();
-  checkRoundState();
-};
-
-/* ---------- Init ---------- */
-renderRoster();
-buildWheel();
-checkRoundState();
+  renderAll();
+})();
 </script>
 </body>
 </html>
