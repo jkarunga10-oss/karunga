@@ -20,6 +20,8 @@
     --crimson-dark: #7C2530;
     --teal: #2E7D6B;
     --teal-dark: #23604F;
+    --sky: #3E7CB1;
+    --sky-dark: #2C5A85;
     --line: rgba(216,170,70,0.28);
     --radius: 10px;
   }
@@ -31,8 +33,10 @@
     min-height:100vh;
     background:
       radial-gradient(1200px 700px at 15% -10%, #2A2049 0%, transparent 55%),
-      radial-gredient(900px 600px at 100% 0%, #241a3f 0%, transparent 50%),
+      radial-gradient(900px 650px at 100% 0%, #241a3f 0%, transparent 50%),
+      radial-gradient(900px 550px at 50% 110%, rgba(216,170,70,0.10) 0%, transparent 60%),
       linear-gradient(180deg, var(--ink) 0%, #140F26 100%);
+    background-attachment: fixed;
     color: var(--cream);
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     line-height:1.5;
@@ -98,7 +102,7 @@
   .panel .sub{ color: rgba(243,233,210,0.55); font-size:0.87rem; margin: 0 0 16px; }
 
   /* ---------- team summary ---------- */
-  .team-row{ display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-bottom: 18px; }
+  .team-row{ display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom: 18px; }
   .team-card{
     border-radius: var(--radius); padding: 18px 18px 16px;
     background: var(--panel); border-top: 3px solid var(--accent, var(--gold));
@@ -152,7 +156,7 @@
   .btn-sm{ padding:6px 12px; font-size:0.78rem; }
 
   /* ---------- round entry ---------- */
-  .roster-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .roster-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
   .roster-col h3{
     font-family:'Fraunces', serif; font-size:0.95rem; font-weight:600; margin:0 0 8px;
     color: var(--accent);
@@ -227,14 +231,45 @@
     margin-top:16px; padding:18px 20px; border-radius: var(--radius);
     border:1px solid var(--gold); background: rgba(216,170,70,0.1);
     animation: pop .35s ease;
+    position:relative; overflow:hidden;
   }
-  .reveal.bad{ border-color: var(--crimson); background: rgba(165,49,63,0.1); }
+  .reveal.bad{ border-color: var(--crimson); background: rgba(165,49,63,0.1); animation: pop .35s ease, sadShake .5s ease .3s; }
   .reveal.again{ border-color: var(--teal); background: rgba(46,125,107,0.1); }
+  .reveal.prize{ border-color: var(--gold); background: linear-gradient(135deg, rgba(216,170,70,0.22), rgba(216,170,70,0.06)); }
   .reveal .rtitle{ font-family:'Fraunces', serif; font-size:1.3rem; font-weight:600; color: var(--gold-soft); }
+  .reveal.prize .rtitle{ font-size:2.1rem; font-weight:800; letter-spacing:0.3px; animation: prizePop .55s cubic-bezier(.34,1.56,.64,1); }
   .reveal.bad .rtitle{ color:#E9AEB4; }
   .reveal.again .rtitle{ color:#9FDCC9; }
   .reveal .rsub{ font-size:0.85rem; color: rgba(243,233,210,0.65); margin-top:4px; }
   @keyframes pop{ from{opacity:0; transform:scale(0.96);} to{opacity:1; transform:scale(1);} }
+  @keyframes prizePop{ 0%{transform:scale(0.4); opacity:0;} 60%{transform:scale(1.18);} 100%{transform:scale(1); opacity:1;} }
+  @keyframes sadShake{ 0%,100%{transform:translateX(0);} 20%{transform:translateX(-5px);} 40%{transform:translateX(5px);} 60%{transform:translateX(-3px);} 80%{transform:translateX(3px);} }
+
+  /* ---------- celebration overlay + confetti ---------- */
+  .confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:150; overflow:hidden; }
+  .confetti-piece{
+    position:absolute; top:-24px; width:9px; height:15px; opacity:0.95; border-radius:2px;
+    animation: confetti-fall linear forwards;
+  }
+  @keyframes confetti-fall{
+    to{ transform: translateY(115vh) rotate(680deg); opacity:0.15; }
+  }
+  .celebrate-overlay{
+    position:fixed; inset:0; z-index:160; display:flex; align-items:center; justify-content:center;
+    background: rgba(10,6,20,0.8); backdrop-filter: blur(2px);
+    animation: fadein .25s ease; padding: 20px;
+  }
+  .celebrate-card{
+    position:relative; text-align:center; padding: 42px 48px; border-radius:16px; max-width:90vw;
+    background: linear-gradient(160deg, rgba(216,170,70,0.24), rgba(60,31,77,0.6));
+    border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    animation: popIn .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn{ from{ transform:scale(0.55); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .celebrate-card .crown-emoji{ font-size:3rem; line-height:1; }
+  .celebrate-card .cname{ font-family:'Fraunces', serif; font-weight:700; font-size:2.3rem; color: var(--gold-soft); margin:10px 0 2px; word-break: break-word; }
+  .celebrate-card .csub{ color: rgba(243,233,210,0.75); font-size:1rem; }
+  .celebrate-card .closeCeleb{ margin-top:20px; }
 
   .spin-log{ margin-top:16px; font-size:0.82rem; color: rgba(243,233,210,0.6); }
   .spin-log div{ padding:5px 0; border-bottom:1px solid rgba(216,170,70,0.1); }
@@ -275,12 +310,14 @@
 </head>
 <body>
 
+<div class="confetti-layer" id="confettiLayer"></div>
+
 <div class="shell">
 
   <header class="hero">
     <div class="titles">
       <h1 class="display">Show Me the Thief</h1>
-      <p>Gummite · Deal Sealers · Victory Vault — live scoreboard</p>
+      <p>Gummite · Deal Sealers · Victory Vault · Quick Fix Stars — live scoreboard</p>
     </div>
     <div class="roundtag" id="roundTag">Round 1</div>
   </header>
@@ -402,20 +439,180 @@
     ["Emily Namara","Deal Sealers"], ["Racheal Nabyonga Kisakye","Deal Sealers"],
     ["Kenneth Birungi","Victory Vault"], ["Akademere Stella Slyvia","Victory Vault"], ["Florence Kaudha","Victory Vault"],
     ["GraceMary Nakabiito","Victory Vault"], ["Milly Nakkazi","Victory Vault"], ["Sarah Akello Flishia","Victory Vault"],
-    ["Manita Joan","Victory Vault"]
+    ["Manita Joan","Victory Vault"],
+    ["Arthur Semwezi","Quick Fix Stars"], ["Rinah Kabahuma","Quick Fix Stars"],
+    ["Jupiter Atuhaire","Quick Fix Stars"], ["Beatrice Nakazzi","Quick Fix Stars"]
   ];
 
-  var TEAMS = ["Gummite","Deal Sealers","Victory Vault"];
-  var TEAM_ACCENT = { "Gummite":"var(--gold)", "Deal Sealers":"var(--teal)", "Victory Vault":"var(--crimson)" };
+  var TEAMS = ["Gummite","Deal Sealers","Victory Vault","Quick Fix Stars"];
+  var TEAM_ACCENT = { "Gummite":"var(--gold)", "Deal Sealers":"var(--teal)", "Victory Vault":"var(--crimson)", "Quick Fix Stars":"var(--sky)" };
   var ROLES = ["King","Queen","Wiseman","Servant","Thief"];
+  // weight = how much of the wheel each segment occupies. Better Luck / Spin Again / 1k-4k
+  // are weighted heavily so they come up most often; 5,000 and 10,000 are rare.
   var SEGMENTS = [
-    {label:"10,000", type:"prize"}, {label:"Spin Again", type:"again"},
-    {label:"5,000", type:"prize"}, {label:"1,000", type:"prize"},
-    {label:"Better Luck Next Time", type:"bad"}, {label:"4,000", type:"prize"},
-    {label:"2,000", type:"prize"}, {label:"3,000", type:"prize"}
+    {label:"10,000", type:"prize", weight:1}, {label:"Spin Again", type:"again", weight:3},
+    {label:"5,000", type:"prize", weight:1}, {label:"1,000", type:"prize", weight:4},
+    {label:"Better Luck Next Time", type:"bad", weight:4}, {label:"4,000", type:"prize", weight:3},
+    {label:"2,000", type:"prize", weight:3}, {label:"3,000", type:"prize", weight:3}
   ];
   var SEGMENT_COLORS = ["var(--gold)","var(--teal)","var(--crimson)","var(--plum-light)",
                          "var(--gold-soft)","var(--teal-dark)","var(--crimson-dark)","var(--plum)"];
+
+  function computeSegmentAngles(){
+    var totalWeight = SEGMENTS.reduce(function(sum, s){ return sum + (s.weight || 1); }, 0);
+    var angles = [];
+    var cum = 0;
+    SEGMENTS.forEach(function(seg){
+      var segAngle = (seg.weight || 1) / totalWeight * 360;
+      angles.push({ start: cum, end: cum + segAngle, mid: cum + segAngle/2, angle: segAngle });
+      cum += segAngle;
+    });
+    return angles;
+  }
+
+  // ---------- SOUND EFFECTS (synthesized, no external files) ----------
+  var audioCtx = null;
+  function getCtx(){
+    if(!audioCtx){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === "suspended"){ audioCtx.resume(); }
+    return audioCtx;
+  }
+
+  function playTone(freq, start, dur, type, peakGain){
+    var ctx = getCtx(); if(!ctx) return;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+    gain.gain.linearRampToValueAtTime(peakGain || 0.18, ctx.currentTime + start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + start);
+    osc.stop(ctx.currentTime + start + dur + 0.05);
+  }
+
+  function playPop(){
+    var ctx = getCtx(); if(!ctx) return;
+    var bufferSize = Math.floor(ctx.sampleRate * 0.15);
+    var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for(var i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.pow(1 - i/bufferSize, 3); }
+    var noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    var filter = ctx.createBiquadFilter();
+    filter.type = "bandpass"; filter.frequency.value = 1800;
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.55, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    noise.start();
+  }
+
+  function playFizz(durationSec){
+    var ctx = getCtx(); if(!ctx) return;
+    var bufferSize = Math.floor(ctx.sampleRate * durationSec);
+    var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for(var i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * 0.3; }
+    var noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    var filter = ctx.createBiquadFilter();
+    filter.type = "highpass"; filter.frequency.value = 4200;
+    var gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.14, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + durationSec);
+    noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    noise.start();
+  }
+
+  function playFanfare(){
+    var notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach(function(f, i){ playTone(f, i*0.12, 0.35, "triangle", 0.18); });
+    setTimeout(playPop, 440);
+    setTimeout(playPop, 640);
+    playFizz(1.6);
+  }
+
+  function playSad(){
+    var notes = [392, 349.23, 329.63, 293.66];
+    notes.forEach(function(f, i){ playTone(f, i*0.22, 0.5, "sawtooth", 0.14); });
+  }
+
+  function playAgainChime(){
+    playTone(660, 0, 0.16, "triangle", 0.15);
+    playTone(880, 0.12, 0.22, "triangle", 0.15);
+  }
+
+  var tensionTimeouts = [];
+  function startTensionSound(durationMs){
+    var ctx = getCtx(); if(!ctx) return;
+    tensionTimeouts.forEach(clearTimeout); tensionTimeouts = [];
+
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(75, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + durationMs/1000);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.055, ctx.currentTime + 0.3);
+    gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + durationMs/1000);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + durationMs/1000 + 0.1);
+
+    var totalTicks = 30, t = 0;
+    for(var i=0;i<totalTicks;i++){
+      var progress = i/totalTicks;
+      var gap = 35 + Math.pow(progress, 2) * 260;
+      t += gap;
+      if(t < durationMs - 100){
+        tensionTimeouts.push(setTimeout(function(){ playTone(1150 + Math.random()*250, 0, 0.04, "square", 0.05); }, t));
+      }
+    }
+  }
+
+  function spawnConfetti(count){
+    var layer = document.getElementById("confettiLayer");
+    if(!layer) return;
+    var colors = ["var(--gold)","var(--teal)","var(--crimson)","var(--gold-soft)","var(--sky)","var(--cream)"];
+    var frag = document.createDocumentFragment();
+    for(var i=0;i<(count || 40);i++){
+      var piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      piece.style.left = (Math.random()*100) + "%";
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      var duration = 1.6 + Math.random()*1.3;
+      piece.style.animationDuration = duration + "s";
+      piece.style.animationDelay = (Math.random()*0.3) + "s";
+      frag.appendChild(piece);
+    }
+    layer.appendChild(frag);
+    setTimeout(function(){
+      layer.querySelectorAll(".confetti-piece").forEach(function(p){ p.remove(); });
+    }, 3200);
+  }
+
+  function showChampionCelebration(name){
+    var overlay = document.createElement("div");
+    overlay.className = "celebrate-overlay";
+    overlay.innerHTML =
+      '<div class="celebrate-card">' +
+        '<div class="crown-emoji">👑</div>' +
+        '<div class="cname display">' + esc(name) + '</div>' +
+        '<div class="csub">Crowned Champion!</div>' +
+        '<button class="btn btn-gold closeCeleb">Continue</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    spawnConfetti(70);
+    playFanfare();
+    function closeIt(){ if(overlay.parentNode) overlay.parentNode.removeChild(overlay); }
+    overlay.querySelector(".closeCeleb").addEventListener("click", closeIt);
+    setTimeout(closeIt, 6000);
+  }
 
   function defaultState(){
     var players = {};
@@ -538,6 +735,7 @@
     }
     state.champion = ranked[0].name;
     save(); renderBoard();
+    showChampionCelebration(state.champion);
   });
 
   // ---------- ROUND ENTRY ----------
@@ -725,19 +923,19 @@
 
   function buildWheel(){
     var cx = 170, cy = 170, r = 165;
-    var segAngle = 360 / SEGMENTS.length;
+    var angles = computeSegmentAngles();
     var parts = SEGMENTS.map(function(seg, i){
-      var start = i * segAngle, end = (i+1) * segAngle;
+      var start = angles[i].start, end = angles[i].end, mid = angles[i].mid;
       var p0 = polarToCartesian(cx, cy, r, start);
       var p1 = polarToCartesian(cx, cy, r, end);
       var path = 'M ' + cx + ' ' + cy + ' L ' + p0.x.toFixed(2) + ' ' + p0.y.toFixed(2) +
         ' A ' + r + ' ' + r + ' 0 0 1 ' + p1.x.toFixed(2) + ' ' + p1.y.toFixed(2) + ' Z';
-      var mid = start + segAngle/2;
       var lp = polarToCartesian(cx, cy, r*0.62, mid);
-      var fontSize = seg.type === "prize" ? 15 : 10.5;
+      var baseSize = seg.type === "prize" ? 15 : 10.5;
+      var fontSize = Math.max(8, Math.min(baseSize, angles[i].angle / 4.2));
       var fill = (seg.type === "bad") ? "#3a1f26" : (seg.type === "again" ? "#12261f" : "#1a1230");
       return '<path d="' + path + '" fill="' + SEGMENT_COLORS[i % SEGMENT_COLORS.length] + '" stroke="#17112B" stroke-width="2"/>' +
-        '<text x="' + lp.x.toFixed(2) + '" y="' + lp.y.toFixed(2) + '" fill="' + fill + '" font-size="' + fontSize +
+        '<text x="' + lp.x.toFixed(2) + '" y="' + lp.y.toFixed(2) + '" fill="' + fill + '" font-size="' + fontSize.toFixed(2) +
         '" font-family="Manrope, sans-serif" font-weight="800" text-anchor="middle" dominant-baseline="middle" ' +
         'transform="rotate(' + mid.toFixed(2) + ' ' + lp.x.toFixed(2) + ' ' + lp.y.toFixed(2) + ')">' + esc(seg.label) + '</text>';
     }).join("");
@@ -752,19 +950,19 @@
   }
 
   function showReveal(name, seg){
-    var cls = seg.type === "prize" ? "" : (seg.type === "bad" ? "bad" : "again");
+    var cls = seg.type === "prize" ? "prize" : (seg.type === "bad" ? "bad" : "again");
     var title, sub;
     if(seg.type === "prize"){
-      title = "🎉 " + name + " wins UGX " + seg.label + "!";
-      sub = "Recorded in the spin log below.";
+      title = "🎉 UGX " + seg.label + "! 🍾";
+      sub = esc(name) + " wins big — recorded in the spin log below.";
     } else if(seg.type === "again"){
       title = "🔁 Spin Again, " + name + "!";
       sub = "Hit Spin the Wheel once more.";
     } else {
-      title = "Better luck next time, " + name + ".";
+      title = "😢 Better luck next time, " + name + ".";
       sub = "That's how the wheel landed.";
     }
-    el("revealSlot").innerHTML = '<div class="reveal ' + cls + '"><div class="rtitle display">' + esc(title) + '</div><div class="rsub">' + esc(sub) + '</div></div>';
+    el("revealSlot").innerHTML = '<div class="reveal ' + cls + '"><div class="rtitle display">' + esc(title) + '</div><div class="rsub">' + (seg.type==="prize" ? sub : esc(sub)) + '</div></div>';
   }
 
   el("spinBtn").addEventListener("click", function(){
@@ -773,25 +971,42 @@
     spinning = true;
     el("spinBtn").disabled = true;
 
-    var segAngle = 360 / SEGMENTS.length;
+    var angles = computeSegmentAngles();
     var extraSpins = 6;
     var randomAngle = Math.random() * 360;
     var totalRotation = currentRotation + extraSpins*360 + randomAngle;
     var wheelEl = el("wheelDisc");
+    var spinDurationMs = 4200;
     wheelEl.style.transition = "transform 4.2s cubic-bezier(0.17,0.67,0.32,1.01)";
     wheelEl.style.transform = "rotate(" + totalRotation + "deg)";
     currentRotation = totalRotation;
+    el("revealSlot").innerHTML = "";
+
+    startTensionSound(spinDurationMs);
 
     function handler(){
       wheelEl.removeEventListener("transitionend", handler);
       var normalized = ((currentRotation % 360) + 360) % 360;
       var pointerAngle = ((360 - normalized) % 360);
-      var index = Math.floor(pointerAngle / segAngle) % SEGMENTS.length;
+      var index = angles.length - 1;
+      for(var i=0;i<angles.length;i++){
+        if(pointerAngle >= angles[i].start && pointerAngle < angles[i].end){ index = i; break; }
+      }
       var seg = SEGMENTS[index];
       state.spins.push({ name:name, result: seg.label, time: new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) });
       save();
       showReveal(name, seg);
       renderSpinLog();
+
+      if(seg.type === "prize"){
+        playFanfare();
+        spawnConfetti(50);
+      } else if(seg.type === "bad"){
+        playSad();
+      } else {
+        playAgainChime();
+      }
+
       spinning = false;
       el("spinBtn").disabled = false;
     }
